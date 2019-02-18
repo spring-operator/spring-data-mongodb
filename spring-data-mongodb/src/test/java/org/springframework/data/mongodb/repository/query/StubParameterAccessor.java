@@ -25,8 +25,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.convert.MongoWriter;
+import org.springframework.data.mongodb.core.query.Collation;
 import org.springframework.data.mongodb.core.query.TextCriteria;
 import org.springframework.data.repository.query.ParameterAccessor;
+import org.springframework.lang.Nullable;
 
 /**
  * Simple {@link ParameterAccessor} that returns the given parameters unfiltered.
@@ -39,6 +41,7 @@ class StubParameterAccessor implements MongoParameterAccessor {
 
 	private final Object[] values;
 	private Range<Distance> range = new Range<Distance>(null, null);
+	private @Nullable Collation colllation;
 
 	/**
 	 * Creates a new {@link ConvertingParameterAccessor} backed by a {@link StubParameterAccessor} simply returning the
@@ -61,7 +64,9 @@ class StubParameterAccessor implements MongoParameterAccessor {
 			if (value instanceof Range) {
 				this.range = (Range<Distance>) value;
 			} else if (value instanceof Distance) {
-				this.range = new Range<Distance>(null, (Distance) value);
+				this.range = new Range<>(null, (Distance) value);
+			} else if (value instanceof Collation) {
+				this.colllation = Collation.class.cast(value);
 			}
 		}
 	}
@@ -130,6 +135,15 @@ class StubParameterAccessor implements MongoParameterAccessor {
 	@Override
 	public TextCriteria getFullText() {
 		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.data.mongodb.repository.query.MongoParameterAccessor#getCollation()
+	 */
+	@Override
+	public Collation getCollation() {
+		return this.colllation;
 	}
 
 	/* (non-Javadoc)
